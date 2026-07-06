@@ -1,0 +1,6 @@
+{
+  "name": "Contractor CRM & Document Management",
+  "description": "سامانه مدیریت اسناد و CRM چندمستأجری برای شرکت پیمانکاری - با قابلیت‌های ایزولاسیون مستأجران، تراکنش‌های انتقال حضانت فیزیکی، شبیه‌ساز ربات تلگرام و دفتر کل تغییرات تغییرناپذیر",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

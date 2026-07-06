@@ -1,0 +1,100 @@
+name: Contractor CRM CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  backend-tests:
+    name: 🐍 Backend Tests & Coverage
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: contractor_crm
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres_password_1020
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libpq-dev build-essential
+
+      - name: Install Python Dependencies
+        run: |
+          cd backend
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Pytest with Coverage
+        env:
+          ENV: testing
+          DATABASE_URL: postgresql+psycopg2://postgres:postgres_password_1020@localhost:5432/contractor_crm
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: testing_secret_key_998877
+          TELEGRAM_BOT_TOKEN: mock_token_for_ci
+          AUDIT_LOG_SALT: testing_cryptochain_salt_1234
+        run: |
+          cd backend
+          pytest --cov=app tests/ --cov-report=xml --cov-fail-under=80
+
+      - name: Upload Backend Coverage Report
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./backend/coverage.xml
+          flags: backend
+          fail_ci_if_error: false
+
+  frontend-build:
+    name: ⚛️ Frontend Build & Lint
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Lint Frontend Code
+        run: npm run lint
+
+      - name: Build React Application
+        run: npm run build
