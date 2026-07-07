@@ -7,11 +7,16 @@ export interface Tenant {
   id: string; // UUIDv7
   name: string;
   is_active: boolean;
+  is_suspended?: boolean;
+  is_deleted?: boolean;
+  license_active?: boolean;
+  license_expires_at?: string;
+  license_key?: string;
   created_at: string;
   updated_at: string;
 }
 
-export type UserRole = 'OWNER' | 'ADMIN' | 'USER';
+export type UserRole = 'SUPER_ADMIN' | 'OWNER' | 'ADMIN' | 'USER';
 
 export interface User {
   id: string; // UUIDv7

@@ -12,6 +12,7 @@ from app.db.session import Base
 # ==============================================================================
 
 class UserRole(str, PyEnum):
+    SUPER_ADMIN = "SUPER_ADMIN"
     OWNER = "OWNER"
     ADMIN = "ADMIN"
     USER = "USER"
@@ -56,6 +57,11 @@ class Tenant(Base):
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    is_suspended: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    is_deleted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    license_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    license_expires_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    license_key: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 

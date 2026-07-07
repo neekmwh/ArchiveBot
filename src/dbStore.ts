@@ -26,6 +26,13 @@ export interface DbData {
 const INITIAL_DATA: DbData = {
   tenants: [
     {
+      id: 'tenant-0000-0000-0000-000000000000',
+      name: 'سامانه مرکزی (SaaS Portal)',
+      is_active: true,
+      created_at: '2026-01-01T08:00:00Z',
+      updated_at: '2026-01-01T08:00:00Z'
+    },
+    {
       id: 'tenant-0000-0000-0000-000000000001',
       name: 'پیمانکاری عمارت شرق',
       is_active: true,
@@ -41,6 +48,16 @@ const INITIAL_DATA: DbData = {
     }
   ],
   users: [
+    // Super Admin
+    {
+      id: 'user-0000-0000-0000-000000000000',
+      tenant_id: 'tenant-0000-0000-0000-000000000000',
+      name: 'مدیر کل سامانه (Super Admin)',
+      phone_number: '09120000000',
+      telegram_user_id: 111111111,
+      role: 'SUPER_ADMIN',
+      is_active: true
+    },
     // Tenant 1
     {
       id: 'user-0001-0000-0000-000000000001',

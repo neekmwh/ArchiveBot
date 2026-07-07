@@ -11,6 +11,7 @@ import TelegramSimulator from './components/TelegramSimulator';
 import S3Storage from './components/S3Storage';
 import DatabaseRLS from './components/DatabaseRLS';
 import AuditLogChain from './components/AuditLogChain';
+import SuperAdminPanel from './components/SuperAdminPanel';
 import { 
   Building2, Bot, HardDrive, Database, ShieldAlert, 
   HelpCircle, ShieldCheck, CheckCircle2, UserCheck, 
@@ -59,13 +60,21 @@ export default function App() {
   const dbData = DbStore.load();
   const currentTenant = dbData.tenants.find(t => t.id === activeTenantId);
 
-  // Tab config
+  // Hide dev tools in production builds (CD-006)
+  const isProduction = (import.meta as any).env?.PROD || (import.meta as any).env?.MODE === 'production';
+
+  // Tab config dynamically built
   const tabs = [
     { id: 'documents', label: '📄 مدیریت اسناد (SaaS CRM)', component: DocDashboard },
-    { id: 'telegram', label: '🤖 شبیه‌ساز ربات تلگرام', component: TelegramSimulator },
-    { id: 's3', label: '☁️ ذخیره‌ساز ابری S3', component: S3Storage },
-    { id: 'database', label: '💾 لایه پایگاه داده و RLS', component: DatabaseRLS },
-    { id: 'audit', label: '🔒 زنجیره ممیزی (Blockchain)', component: AuditLogChain },
+    ...(activeUser?.role === 'SUPER_ADMIN' ? [
+      { id: 'super_admin', label: '👑 پنل مدیریت ارشد (SaaS Portal)', component: SuperAdminPanel }
+    ] : []),
+    ...(!isProduction ? [
+      { id: 'telegram', label: '🤖 شبیه‌ساز ربات تلگرام', component: TelegramSimulator },
+      { id: 's3', label: '☁️ ذخیره‌ساز ابری S3', component: S3Storage },
+      { id: 'database', label: '💾 لایه پایگاه داده و RLS', component: DatabaseRLS },
+      { id: 'audit', label: '🔒 دفتر ممیزی زنجیره‌بندی شده', component: AuditLogChain },
+    ] : [])
   ];
 
   return (
@@ -105,21 +114,25 @@ export default function App() {
             </div>
           </div>
 
-          {/* Active Tenant Switcher */}
-          <div className="flex items-center gap-2 shrink-0">
-            <Building2 className="w-4 h-4 text-white/40 shrink-0" />
-            <select
-              value={activeTenantId}
-              onChange={(e) => handleTenantChange(e.target.value)}
-              className="bg-[#0d0d10] border border-white/10 hover:border-white/20 text-xs font-bold text-white/90 rounded-lg py-1.5 px-3 focus:outline-none cursor-pointer"
-            >
-              {dbData.tenants.map(t => (
-                <option key={t.id} value={t.id} className="bg-[#111114]">
-                  🏢 {t.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          {/* Active Tenant Switcher - Only visible to Super Admin or in Dev mode (CD-008) */}
+          {(activeUser?.role === 'SUPER_ADMIN' || !isProduction) && (
+            <div className="flex items-center gap-2 shrink-0">
+              <Building2 className="w-4 h-4 text-white/40 shrink-0" />
+              <select
+                value={activeTenantId}
+                onChange={(e) => handleTenantChange(e.target.value)}
+                className="bg-[#0d0d10] border border-white/10 hover:border-white/20 text-xs font-bold text-white/90 rounded-lg py-1.5 px-3 focus:outline-none cursor-pointer"
+              >
+                {dbData.tenants
+                  .filter(t => activeUser?.role === 'SUPER_ADMIN' || t.id !== 'tenant-0000-0000-0000-000000000000')
+                  .map(t => (
+                    <option key={t.id} value={t.id} className="bg-[#111114]">
+                      🏢 {t.name}
+                    </option>
+                  ))}
+              </select>
+            </div>
+          )}
 
         </div>
       </header>

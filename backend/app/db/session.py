@@ -35,6 +35,21 @@ def set_tenant_context(db: Session, tenant_id: str) -> None:
         else:
             raise
 
+def set_super_admin_context(db: Session) -> None:
+    """
+    Sets the bypass_rls variable to true for the current transaction.
+    This allows Super Admins to query across all tenants and perform operations on any tenant.
+    """
+    if not db.in_transaction():
+        db.begin()
+    try:
+        db.execute(text("SET LOCAL app.bypass_rls = 'true'"))
+    except Exception as e:
+        if "sqlite" in str(db.bind.url):
+            pass
+        else:
+            raise
+
 def clear_tenant_context(db: Session) -> None:
     """
     Clears the current tenant context.

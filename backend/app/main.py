@@ -18,6 +18,7 @@ from app.api.v1.access import router as access_router
 from app.api.v1.audit import router as audit_router
 from app.api.v1.storage import router as storage_router
 from app.api.v1.telegram import router as telegram_router
+from app.api.v1.super_admin import router as super_admin_router
 
 # Configure logging
 logging.basicConfig(
@@ -105,6 +106,7 @@ app.include_router(access_router, prefix="/api/v1/access", tags=["Access Request
 app.include_router(audit_router, prefix="/api/v1/audit", tags=["Audit Logs"])
 app.include_router(storage_router, prefix="/api/v1/storage", tags=["Storage & File Management"])
 app.include_router(telegram_router, prefix="/api/v1/telegram", tags=["Telegram Bot"])
+app.include_router(super_admin_router, prefix="/api/v1/super-admin", tags=["Super Admin Panel"])
 
 
 @app.get("/")

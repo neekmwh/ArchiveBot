@@ -6,7 +6,7 @@ from jose import jwt, JWTError
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.db.session import get_db, set_tenant_context
+from app.db.session import get_db, set_tenant_context, set_super_admin_context
 from app.db.models import User, UserRole, Tenant
 from app.schemas.schemas import TokenPayload
 
@@ -83,7 +83,10 @@ def get_current_user(
         )
 
     # Dynamic context registration for Postgres Row-Level Security
-    set_tenant_context(db, str(user.tenant_id))
+    if user.role == UserRole.SUPER_ADMIN:
+        set_super_admin_context(db)
+    else:
+        set_tenant_context(db, str(user.tenant_id))
     
     return user
 
